@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql-container
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=thelittleprincebehide
+      - MYSQL_DATABASE=thelittleprince
+      # - MYSQL_USER=thelittleprince
+      # - MYSQL_PASSWORD=thelittleprincebehide
+      - APACHE_URL=http://apache:8008
+    networks:
+      - my-net
+    ports:
+      - "4000:3306"
+    volumes:
+      - ./db/:/docker-entrypoint-initdb.d/
+
+  apache:
+    build:
+      context: .
+    container_name: apache-n-php-container
+    restart: always
+    ports:
+      - "8080:80"
+      # - "3306:3306"
+    volumes:
+      - ./TheLittlePrince_Behide:/var/www/html/
+    networks:
+      - my-net
+    environment: 
+      - MYSQL_URL=http://mysql:4000
+    links:
+      - mysql
+    depends_on:
+      - mysql
+
+networks:
+  my-net:
+    driver: bridge
